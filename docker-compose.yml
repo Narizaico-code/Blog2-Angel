@@ -1,28 +1,12 @@
 services:
-  mongo:
-    image: mongo:7
-    restart: unless-stopped
-    ports:
-      - "${MONGO_PORT:-27017}:27017"
-    volumes:
-      - mongo_data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   backend:
     build: ./Back_Blog
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-3000}:3000"
-    environment:
-      PORT: 3000
-      MONGODB_CNN: mongodb://mongo:27017/${MONGO_DB:-blog}
-    depends_on:
-      mongo:
-        condition: service_healthy
+    env_file:
+      - ./Back_Blog/.env
 
   frontend:
     build:
@@ -34,6 +18,3 @@ services:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
       - backend
-
-volumes:
-  mongo_data:
